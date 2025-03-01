@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Metadata Analyzer</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #0056b3;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background-color: #dc3545;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .upload-form {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .file-input-container {
+            margin: 20px 0;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .custom-file-upload {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .custom-file-upload:hover {
+            background-color: #0056b3;
+        }
+
+        button[type="submit"] {
+            padding: 12px 24px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #218838;
+        }
+
+        .metadata {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .image-preview {
+            width: 50mm;  /* Standard passport photo width */
+            height: 70mm; /* Standard passport photo height */
+            object-fit: cover;
+            border-radius: 4px;
+            margin: 20px auto;
+            display: block;
+            border: 1px solid #ddd;
+        }
+
+        .metadata p {
+            margin: 10px 0;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .metadata strong {
+            color: #007bff;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .alert-error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="{{ url_for('history') }}" class="nav-link">View History</a>
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    </div>
+
+    <div class="container">
+        <h1>Image Metadata Analyzer</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category != 'message' %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" enctype="multipart/form-data" class="upload-form">
+            <div class="file-input-container">
+                <label for="file-upload" class="custom-file-upload">
+                    Choose File
+                </label>
+                <input id="file-upload" type="file" name="file" accept="image/*" required>
+            </div>
+            <button type="submit">Upload and Analyze</button>
+        </form>
+
+        {% if metadata_info %}
+            <div class="metadata">
+                <h2>Uploaded Image Metadata</h2>
+                {% if filename %}
+                <img src="{{ url_for('uploaded_file', filename=filename) }}" alt="Uploaded Image" class="image-preview">
+                {% endif %}
+                <p><strong>Camera Model:</strong> {{ metadata_info.get('camera_model', 'Not available') }}</p>
+                <p><strong>Exposure Time:</strong> {{ metadata_info.get('exposure_time', 'Not available') }}</p>
+                <p><strong>GPS Info:</strong> {{ metadata_info.get('gps_info', 'Not available') }}</p>
+                <p><strong>Date & Time:</strong> {{ metadata_info.get('date_time', 'Not available') }}</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Show selected filename
+        document.getElementById('file-upload').addEventListener('change', function() {
+            const fileName = this.files[0].name;
+            const label = document.querySelector('.custom-file-upload');
+            label.textContent = fileName;
+        });
+    </script>
+</body>
+</html> 
